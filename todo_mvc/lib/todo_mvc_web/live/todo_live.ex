@@ -1,7 +1,7 @@
 defmodule TodoMvcWeb.TodoLive do
   use TodoMvcWeb, :live_view
 
-  def mount(params, _session, socket) do
+  def handle_params(params, _url, socket) do
     filter = case params do
       %{"filter" => filter} when filter in ["completed", "active"] ->
         params["filter"]
@@ -24,7 +24,7 @@ defmodule TodoMvcWeb.TodoLive do
       |> update_has_completed()
       |> filter_todos()
 
-    {:ok, socket}
+    {:noreply, socket}
   end
 
   def handle_event("change_filter", %{"filter" => filter}, socket) do
@@ -32,6 +32,7 @@ defmodule TodoMvcWeb.TodoLive do
       socket
       |> assign(:filter, filter)
       |> filter_todos()
+      |> push_patch(to: Routes.todo_path(socket, :index, filter))
 
     {:noreply, socket}
   end
