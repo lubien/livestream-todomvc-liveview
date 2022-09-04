@@ -1,7 +1,15 @@
 defmodule TodoMvcWeb.TodoLive do
   use TodoMvcWeb, :live_view
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
+    filter = case params do
+      %{"filter" => filter} when filter in ["completed", "active"] ->
+        params["filter"]
+
+      _ ->
+        "all"
+    end
+
     todos = [
       %{id: Ecto.UUID.generate(), message: "A", completed?: false},
       %{id: Ecto.UUID.generate(), message: "B", completed?: false},
@@ -10,11 +18,11 @@ defmodule TodoMvcWeb.TodoLive do
 
     socket =
       socket
-      |> assign(:filter, "all")
+      |> assign(:filter, filter)
       |> assign(:todos, todos)
-      |> assign(:filtered_todos, todos)
       |> count_active()
       |> update_has_completed()
+      |> filter_todos()
 
     {:ok, socket}
   end
